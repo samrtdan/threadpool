@@ -4,6 +4,8 @@
 #include <vector>
 #include <boost/thread.hpp>
 
+typedef void (*func)(void*) MsgRunCallback; 
+
 enum ThreadPoolState
 {
     THREAD_POOL_RUNNING  = 0, // Thread Pool is running 
@@ -24,9 +26,6 @@ class ThreadPool
 
         void Queue(MsgRunCallback & msg);
 
-        /*
-         *      * @brief 目前只支持扩容，不支持缩容
-         *           */
         int resize(int thread_num);
 
         void set_max_work_thread_num(int max_work_thread_num){ _max_work_thread_num = max_work_thread_num; }
@@ -39,10 +38,11 @@ class ThreadPool
         int _work_thread_num;
         int _max_work_thread_num;
         boost::mutex _mutex;
+        boost::condition _cond;
         std::vector<boost::thread *> _thread_pool;
+        boost::list<MsgRunCallback> _queue;
 
         int _max_queue_num;
-        BlockingQueue<MsgRunCallback>  _msg_blocking_queue; 
 };
 
 
